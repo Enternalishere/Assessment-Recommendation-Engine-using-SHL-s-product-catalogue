@@ -8,6 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from .shl.indexer import load_catalog
 from .shl.recommender import Recommender
+from .shl.scraper import run as scrape_run
+from .shl.indexer import index as index_run
 
 
 app = FastAPI()
@@ -32,6 +34,13 @@ def jd_from_url(u: str) -> str:
 def on_startup():
     global catalog_items, rec
     catalog_items = len(load_catalog())
+    if catalog_items == 0:
+        try:
+            scrape_run()
+            index_run()
+        except Exception:
+            pass
+        catalog_items = len(load_catalog())
     rec = Recommender()
 
 
